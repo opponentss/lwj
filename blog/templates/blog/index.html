@@ -1,0 +1,104 @@
+{% extends 'blog/base.html' %}
+{% load static %}
+
+{% block title %}首页 - lvy-neko 的个人博客{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">最新文章</h1>
+    <p class="page-subtitle">分享技术、生活和思考</p>
+</div>
+
+<div class="articles-list">
+    {% for article in articles %}
+    <article class="article-card">
+        {% if article.cover_image %}
+        <div class="article-cover">
+            <img src="{{ article.cover_image.url }}" alt="{{ article.title }}">
+        </div>
+        {% endif %}
+        <div class="article-content">
+            <div class="article-meta">
+                <span class="article-date"><i class="far fa-calendar"></i> {{ article.published_at|date:"Y-m-d" }}</span>
+                <span class="article-category">
+                    {% if article.category %}
+                    <i class="fas fa-folder"></i> {{ article.category.name }}
+                    {% endif %}
+                </span>
+                <span class="article-views"><i class="far fa-eye"></i> {{ article.views }}</span>
+                <span class="article-likes"><i class="far fa-heart"></i> {{ article.likes }}</span>
+            </div>
+            <h2 class="article-title">
+                <a href="{% url 'article_detail' article.slug %}">{{ article.title }}</a>
+            </h2>
+            <p class="article-excerpt">
+                {{ article.excerpt|default:article.content|striptags|truncatechars:200 }}
+            </p>
+            <div class="article-footer">
+                <a href="{% url 'article_detail' article.slug %}" class="read-more">阅读全文 <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </article>
+    {% empty %}
+    <div class="no-articles">
+        <i class="fas fa-newspaper fa-3x"></i>
+        <h3>暂无文章</h3>
+        <p>还没有发布任何文章，快去写一篇吧！</p>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- 分页加载（如果需要） -->
+<div class="load-more-container">
+    <button class="load-more-btn" id="load-more">加载更多文章</button>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 分页加载功能
+    document.addEventListener('DOMContentLoaded', function() {
+        const loadMoreBtn = document.getElementById('load-more');
+        if (loadMoreBtn) {
+            let page = 2;
+            loadMoreBtn.addEventListener('click', function() {
+                fetch(`/api/articles/?page=${page}&per_page=5`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.articles.length > 0) {
+                            data.articles.forEach(article => {
+                                const articleHTML = `
+                                    <article class="article-card">
+                                        <div class="article-content">
+                                            <div class="article-meta">
+                                                <span class="article-date"><i class="far fa-calendar"></i> ${article.published_at}</span>
+                                                <span class="article-views"><i class="far fa-eye"></i> ${article.views}</span>
+                                            </div>
+                                            <h2 class="article-title">
+                                                <a href="/article/${article.slug}/">${article.title}</a>
+                                            </h2>
+                                            <p class="article-excerpt">${article.excerpt}</p>
+                                            <div class="article-footer">
+                                                <a href="/article/${article.slug}/" class="read-more">阅读全文 <i class="fas fa-arrow-right"></i></a>
+                                            </div>
+                                        </div>
+                                    </article>
+                                `;
+                                document.querySelector('.articles-list').insertAdjacentHTML('beforeend', articleHTML);
+                            });
+                            page++;
+                            if (!data.has_next) {
+                                loadMoreBtn.style.display = 'none';
+                            }
+                        } else {
+                            loadMoreBtn.style.display = 'none';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('加载文章失败:', error);
+                    });
+            });
+        }
+    });
+</script>
+{% endblock %}

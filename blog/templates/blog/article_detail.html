@@ -1,0 +1,126 @@
+{% extends 'blog/base.html' %}
+{% load static %}
+{% load markdownx %}
+
+
+{% block title %}{{ article.title }} - lvy-neko 的个人博客{% endblock %}
+
+{% block content %}
+<article class="article-detail">
+    <!-- 文章头部 -->
+    <header class="article-header">
+        <div class="article-meta">
+            <span class="article-date"><i class="far fa-calendar"></i> {{ article.published_at|date:"Y年m月d日" }}</span>
+            <span class="article-author"><i class="fas fa-user"></i> {{ article.author.username }}</span>
+            {% if article.category %}
+            <span class="article-category"><i class="fas fa-folder"></i> {{ article.category.name }}</span>
+            {% endif %}
+            <span class="article-views"><i class="far fa-eye"></i> {{ article.views }} 阅读</span>
+            <span class="article-likes"><i class="far fa-heart"></i> {{ article.likes }} 点赞</span>
+        </div>
+        <h1 class="article-title">{{ article.title }}</h1>
+        {% if article.excerpt %}
+        <p class="article-subtitle">{{ article.excerpt }}</p>
+        {% endif %}
+    </header>
+
+    <!-- 文章封面 -->
+    {% if article.cover_image %}
+    <div class="article-cover-detail">
+        <img src="{{ article.cover_image.url }}" alt="{{ article.title }}">
+    </div>
+    {% endif %}
+
+    <!-- 文章内容 -->
+    <div class="article-body">
+        {{ article.content|markdownx|safe }}
+    </div>
+
+    <!-- 文章底部 -->
+    <footer class="article-footer-detail">
+        <div class="article-tags">
+            <!-- 标签功能可以后续扩展 -->
+        </div>
+        <div class="article-actions">
+            <button class="action-btn like-btn" data-article-id="{{ article.id }}">
+                <i class="far fa-heart"></i> 点赞 (<span id="like-count">{{ article.likes }}</span>)
+            </button>
+            <button class="action-btn share-btn">
+                <i class="fas fa-share-alt"></i> 分享
+            </button>
+            {% if user.is_staff %}
+            <a href="/admin/blog/article/{{ article.id }}/change/" class="action-btn edit-btn">
+                <i class="fas fa-edit"></i> 编辑
+            </a>
+            {% endif %}
+        </div>
+    </footer>
+</article>
+
+<!-- 随机推荐文章 -->
+<section class="related-articles">
+    <h3 class="section-title"><i class="fas fa-random"></i> 随机推荐</h3>
+    <div class="related-grid">
+        {% for random_article in random_articles %}
+        <div class="related-card">
+            <h4 class="related-title">
+                <a href="{% url 'article_detail' random_article.slug %}">{{ random_article.title }}</a>
+            </h4>
+            <p class="related-excerpt">{{ random_article.excerpt|default:random_article.content|striptags|truncatechars:100 }}</p>
+            <div class="related-meta">
+                <span class="related-date">{{ random_article.published_at|date:"Y-m-d" }}</span>
+                <span class="related-views">{{ random_article.views }} 阅读</span>
+            </div>
+        </div>
+        {% empty %}
+        <p class="no-related">暂无推荐文章</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 点赞功能
+        const likeBtn = document.querySelector('.like-btn');
+        if (likeBtn) {
+            likeBtn.addEventListener('click', function() {
+                const articleId = this.dataset.articleId;
+                fetch(`/api/article/${articleId}/like/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('like-count').textContent = data.likes;
+                        likeBtn.innerHTML = '<i class="fas fa-heart"></i> 已点赞 (' + data.likes + ')';
+                        likeBtn.classList.add('liked');
+                    }
+                })
+                .catch(error => console.error('点赞失败:', error));
+            });
+        }
+
+        // 获取CSRF令牌的辅助函数
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    });
+</script>
+{% endblock %}

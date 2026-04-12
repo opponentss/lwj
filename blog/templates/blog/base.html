@@ -1,0 +1,141 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}lvy-neko 的个人博客{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'blog/css/style.css' %}?v=1">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <header class="navbar">
+        <div class="container">
+            <div class="navbar-content">
+                <div class="navbar-brand">
+                    <a href="{% url 'home' %}">lvy-neko</a>
+                </div>
+                <div class="navbar-date" id="current-date">
+                    <!-- 动态日期由JS填充 -->
+                </div>
+                <div class="navbar-links">
+                    <a href="{% url 'home' %}" class="nav-link"><i class="fas fa-home"></i> 首页</a>
+                    <a href="{% url 'about' %}" class="nav-link"><i class="fas fa-info-circle"></i> 关于</a>
+                    {% if user.is_staff %}
+                    <a href="/admin/blog/article/add/" class="nav-link admin-only"><i class="fas fa-edit"></i> 写文章</a>
+                    {% endif %}
+                </div>
+                <button class="mobile-menu-btn" id="mobile-menu-btn">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 移动端菜单 -->
+    <div class="mobile-menu" id="mobile-menu">
+        <a href="{% url 'home' %}" class="mobile-nav-link"><i class="fas fa-home"></i> 首页</a>
+        <a href="{% url 'about' %}" class="mobile-nav-link"><i class="fas fa-info-circle"></i> 关于</a>
+        {% if user.is_staff %}
+        <a href="/admin/blog/article/add/" class="mobile-nav-link admin-only"><i class="fas fa-edit"></i> 写文章</a>
+        {% endif %}
+        <div class="mobile-social-links">
+            {% for link in social_links %}
+            <a href="{{ link.url }}" target="_blank" class="social-icon" title="{{ link.get_platform_display }}">
+                <i class="{{ link.icon_class|default:'fab fa-github' }}"></i>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- 主要内容区域 -->
+    <main class="main-content">
+        <div class="container">
+            <div class="layout">
+                <!-- 左侧主内容 -->
+                <div class="main-column">
+                    {% block content %}{% endblock %}
+                </div>
+
+                <!-- 右侧侧边栏 -->
+                <div class="sidebar">
+                    {% block sidebar %}
+                    <!-- 日历组件 -->
+                    <div class="sidebar-card">
+                        <h3 class="sidebar-title"><i class="fas fa-calendar-alt"></i> 日历</h3>
+                        <div class="calendar" id="calendar">
+                            <!-- 日历由JS动态生成 -->
+                            <div class="calendar-loading">加载日历中...</div>
+                        </div>
+                    </div>
+
+                    <!-- 随机推荐 -->
+                    <div class="sidebar-card">
+                        <div class="sidebar-header">
+                            <h3 class="sidebar-title"><i class="fas fa-random"></i> 随机推荐</h3>
+                            <button class="refresh-btn" id="refresh-random"><i class="fas fa-redo"></i> 换一批</button>
+                        </div>
+                        <div class="random-articles" id="random-articles">
+                            <!-- 随机文章由JS动态加载 -->
+                            <div class="loading">加载中...</div>
+                        </div>
+                    </div>
+
+                    <!-- 社交链接 -->
+                    <div class="sidebar-card">
+                        <h3 class="sidebar-title"><i class="fas fa-share-alt"></i> 社交链接</h3>
+                        <div class="social-links">
+                            {% for link in social_links %}
+                            <a href="{{ link.url }}" target="_blank" class="social-link" title="{{ link.get_platform_display }}">
+                                <i class="{{ link.icon_class|default:'fab fa-github' }}"></i>
+                                <span>{{ link.get_platform_display }}</span>
+                            </a>
+                            {% empty %}
+                            <p class="no-links">暂无社交链接</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- 统计数字 -->
+                    <div class="sidebar-card stats-card">
+                        <h3 class="sidebar-title"><i class="fas fa-chart-bar"></i> 统计</h3>
+                        <div class="stats-number" id="article-count">
+                            {{ article_count|default:"1711" }}
+                        </div>
+                        <p class="stats-label">文章总数</p>
+                    </div>
+
+                    <!-- 开发中提示 -->
+                    <div class="sidebar-card dev-card">
+                        <h3 class="sidebar-title"><i class="fas fa-tools"></i> 开发中</h3>
+                        <ul class="dev-list">
+                            <li class="dev-item"><span class="dev-label">我的项目</span> <span class="dev-status">即将上线</span></li>
+                            <li class="dev-item"><span class="dev-label">优秀博客</span> <span class="dev-status">开发中</span></li>
+                            <li class="dev-item"><span class="dev-label">资源导航</span> <span class="dev-status">规划中</span></li>
+                        </ul>
+                    </div>
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 底部 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <p class="copyright">&copy; {% now "Y" %} lvy-neko 的个人博客. 保留所有权利.</p>
+                <p class="beian">备案号：<a href="https://beian.miit.gov.cn/" target="_blank">京ICP备12345678号</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 脚本 -->
+    <script src="{% static 'blog/js/main.js' %}?v=1"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

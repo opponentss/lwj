@@ -1,0 +1,103 @@
+
+{% extends 'blog/base.html' %}
+{% load static %}
+
+{% block title %}关于 - lvy-neko 的个人博客{% endblock %}
+
+{% block content %}
+<div class="about-page">
+    <div class="about-header">
+        <h1 class="about-title">关于本站</h1>
+        <p class="about-subtitle">一个分享技术、生活和思考的个人空间</p>
+    </div>
+
+    <div class="about-content">
+        <div class="about-card">
+            <h2><i class="fas fa-rocket"></i> 网站简介</h2>
+            <p>这是一个使用 Django 构建的个人博客/导航网站，旨在分享技术文章、生活感悟和实用工具。网站设计简洁、响应式，注重用户体验。</p>
+            <p>灵感来源于 <a href="https://lvyovo-wiki.tech" target="_blank">lvyovo-wiki.tech</a>，采用了类似的卡片式布局和功能模块。</p>
+        </div>
+
+        <div class="about-card">
+            <h2><i class="fas fa-cogs"></i> 技术栈</h2>
+            <ul class="tech-stack">
+                <li><strong>后端：</strong> Django 4.2 + SQLite/PostgreSQL</li>
+                <li><strong>前端：</strong> HTML5 + CSS3 + 原生 JavaScript</li>
+                <li><strong>编辑器：</strong> django-markdownx (Markdown 支持)</li>
+                <li><strong>部署：</strong> 支持 Docker、Nginx、Gunicorn</li>
+                <li><strong>其他：</strong> Font Awesome 图标、Google Fonts 字体</li>
+            </ul>
+        </div>
+
+        <div class="about-card">
+            <h2><i class="fas fa-feather-alt"></i> 功能特性</h2>
+            <div class="features-grid">
+                <div class="feature">
+                    <i class="fas fa-newspaper"></i>
+                    <h3>文章系统</h3>
+                    <p>支持 Markdown 编辑和渲染，包含分类、标签、阅读量统计</p>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-calendar-alt"></i>
+                    <h3>日历组件</h3>
+                    <p>动态日历，高亮有文章发布的日期，支持点击跳转</p>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-random"></i>
+                    <h3>随机推荐</h3>
+                    <p>每次刷新或点击"换一批"随机获取推荐文章</p>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-chart-bar"></i>
+                    <h3>数据统计</h3>
+                    <p>显示文章总数、访问量等统计数字</p>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-mobile-alt"></i>
+                    <h3>响应式设计</h3>
+                    <p>适配桌面、平板和手机等不同屏幕尺寸</p>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>权限管理</h3>
+                    <p>管理员可发布文章，普通用户仅可浏览</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="about-card">
+            <h2><i class="fas fa-user"></i> 关于我</h2>
+            <div class="author-info">
+                <div class="author-avatar">
+                    <i class="fas fa-user-circle fa-5x"></i>
+                </div>
+                <div class="author-details">
+                    <h3>lvy-neko</h3>
+                    <p>一名热爱技术的开发者，喜欢探索新技术、分享知识和构建有趣的项目。</p>
+                    <p>主要关注领域：Web 开发、Python、JavaScript、DevOps、用户体验设计。</p>
+                    <div class="author-links">
+                        {% for link in social_links %}
+                        <a href="{{ link.url }}" target="_blank" class="author-link">
+                            <i class="{{ link.icon_class|default:'fab fa-github' }}"></i>
+                            {{ link.get_platform_display }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="about-card">
+            <h2><i class="fas fa-road"></i> 开发计划</h2>
+            <ul class="roadmap">
+                <li><span class="status done">✓</span> 基础博客功能（已完成）</li>
+                <li><span class="status in-progress">●</span> 评论系统（开发中）</li>
+                <li><span class="status pending">○</span> 文章搜索功能（计划中）</li>
+                <li><span class="status pending">○</span> 用户注册登录（计划中）</li>
+                <li><span class="status pending">○</span> 暗色主题切换（计划中）</li>
+                <li><span class="status pending">○</span> API 文档（计划中）</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
