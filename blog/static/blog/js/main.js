@@ -300,7 +300,7 @@ function initScrollEffects() {
         width: 50px;
         height: 50px;
         border-radius: 50%;
-        background-color: #6c5ce7;
+        background-color: var(--accent);
         color: white;
         border: none;
         cursor: pointer;
@@ -308,7 +308,7 @@ function initScrollEffects() {
         align-items: center;
         justify-content: center;
         font-size: 1.2rem;
-        box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4);
+        box-shadow: 0 5px 15px rgba(53, 191, 171, 0.4);
         z-index: 999;
         transition: opacity 0.3s, transform 0.3s;
     `;
