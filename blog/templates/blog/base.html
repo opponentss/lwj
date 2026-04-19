@@ -17,16 +17,23 @@
         <div class="container">
             <div class="navbar-content">
                 <div class="navbar-brand">
-                    <a href="{% url 'home' %}">lvy-neko</a>
+                    <a href="{% url 'home' %}">lwj-neko</a>
                 </div>
                 <div class="navbar-date" id="current-date">
                     <!-- 动态日期由JS填充 -->
                 </div>
                 <div class="navbar-links">
                     <a href="{% url 'home' %}" class="nav-link"><i class="fas fa-home"></i> 首页</a>
+                    <a href="{% url 'photo_wall' %}" class="nav-link"><i class="fas fa-images"></i> 照片墙</a>
                     <a href="{% url 'about' %}" class="nav-link"><i class="fas fa-info-circle"></i> 关于</a>
                     {% if user.is_staff %}
+                    <a href="{% url 'photo_upload' %}" class="nav-link"><i class="fas fa-cloud-upload-alt"></i> 上传</a>
                     <a href="/admin/blog/article/add/" class="nav-link admin-only"><i class="fas fa-edit"></i> 写文章</a>
+                    {% endif %}
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'logout' %}" class="nav-link"><i class="fas fa-sign-out-alt"></i> 登出</a>
+                    {% else %}
+                    <a href="{% url 'login' %}" class="nav-link"><i class="fas fa-sign-in-alt"></i> 登录</a>
                     {% endif %}
                 </div>
                 <button class="mobile-menu-btn" id="mobile-menu-btn">
@@ -39,9 +46,16 @@
     <!-- 移动端菜单 -->
     <div class="mobile-menu" id="mobile-menu">
         <a href="{% url 'home' %}" class="mobile-nav-link"><i class="fas fa-home"></i> 首页</a>
+        <a href="{% url 'photo_wall' %}" class="mobile-nav-link"><i class="fas fa-images"></i> 照片墙</a>
         <a href="{% url 'about' %}" class="mobile-nav-link"><i class="fas fa-info-circle"></i> 关于</a>
         {% if user.is_staff %}
+        <a href="{% url 'photo_upload' %}" class="mobile-nav-link"><i class="fas fa-cloud-upload-alt"></i> 上传照片</a>
         <a href="/admin/blog/article/add/" class="mobile-nav-link admin-only"><i class="fas fa-edit"></i> 写文章</a>
+        {% endif %}
+        {% if user.is_authenticated %}
+        <a href="{% url 'logout' %}" class="mobile-nav-link"><i class="fas fa-sign-out-alt"></i> 登出</a>
+        {% else %}
+        <a href="{% url 'login' %}" class="mobile-nav-link"><i class="fas fa-sign-in-alt"></i> 登录</a>
         {% endif %}
         <div class="mobile-social-links">
             {% for link in social_links %}
@@ -113,7 +127,6 @@
                     <div class="sidebar-card dev-card">
                         <h3 class="sidebar-title"><i class="fas fa-tools"></i> 开发中</h3>
                         <ul class="dev-list">
-                            <li class="dev-item"><span class="dev-label">我的项目</span> <span class="dev-status">即将上线</span></li>
                             <li class="dev-item"><span class="dev-label">优秀博客</span> <span class="dev-status">开发中</span></li>
                             <li class="dev-item"><span class="dev-label">资源导航</span> <span class="dev-status">规划中</span></li>
                         </ul>

@@ -128,3 +128,21 @@ class SiteStat(models.Model):
         stat.value += amount
         stat.save()
         return stat.value
+
+
+class Photo(models.Model):
+    """照片模型"""
+    image = models.ImageField(upload_to='photos/%Y/%m/%d/', verbose_name="照片")
+    title = models.CharField(max_length=200, blank=True, verbose_name="标题")
+    description = models.TextField(blank=True, verbose_name="描述")
+    display_order = models.PositiveSmallIntegerField(default=0, verbose_name="显示顺序")
+    is_public = models.BooleanField(default=True, verbose_name="是否公开")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="上传时间")
+
+    class Meta:
+        verbose_name = "照片"
+        verbose_name_plural = "照片墙"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.title or f"照片 {self.id}"

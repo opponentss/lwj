@@ -1,0 +1,411 @@
+{% extends 'blog/base.html' %}
+{% load static %}
+
+{% block title %}照片管理 - lwj-neko{% endblock %}
+
+{% block content %}
+<div class="photo-upload-page">
+    <div class="page-header">
+        <h1 class="page-title">照片管理</h1>
+        <p class="page-subtitle">上传和管理你的照片</p>
+    </div>
+
+    <!-- 上传表单 -->
+    <div class="upload-section">
+        <h2><i class="fas fa-cloud-upload-alt"></i> 上传新照片</h2>
+        <form method="post" enctype="multipart/form-data" class="upload-form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="id_image" class="form-label">选择照片</label>
+                <div class="file-upload-wrapper">
+                    <input type="file" name="image" id="id_image" accept="image/*" required class="file-input">
+                    <div class="file-upload-area" id="file-upload-area">
+                        <i class="fas fa-cloud-upload-alt fa-2x"></i>
+                        <p>点击或拖拽照片到这里</p>
+                        <span class="file-types">支持 JPG, PNG, GIF 格式</span>
+                    </div>
+                </div>
+                <div class="preview-area" id="preview-area" style="display: none;">
+                    <img id="image-preview" src="" alt="预览">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="id_title" class="form-label">标题（可选）</label>
+                    <input type="text" name="title" id="id_title" class="form-input" placeholder="输入照片标题">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">是否公开</label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="is_public" id="id_is_public" checked>
+                        <span>公开显示在照片墙</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="id_description" class="form-label">描述（可选）</label>
+                <textarea name="description" id="id_description" class="form-textarea" rows="3" placeholder="输入照片描述"></textarea>
+            </div>
+            
+            <button type="submit" class="submit-btn">
+                <i class="fas fa-upload"></i> 上传照片
+            </button>
+        </form>
+    </div>
+
+    <!-- 照片列表 -->
+    <div class="photos-section">
+        <h2><i class="fas fa-images"></i> 已上传的照片</h2>
+        
+        {% if photos %}
+        <div class="photo-list">
+            {% for photo in photos %}
+            <div class="photo-card">
+                <div class="photo-thumb">
+                    <img src="{{ photo.image.url }}" alt="{{ photo.title|default:'照片' }}">
+                </div>
+                <div class="photo-info">
+                    <h3>{{ photo.title|default:'无标题' }}</h3>
+                    <p class="photo-date">{{ photo.created_at|date:"Y-m-d H:i" }}</p>
+                    <span class="photo-status {% if photo.is_public %}status-public{% else %}status-private{% endif %}">
+                        {{ photo.is_public|yesno:"公开,私有" }}
+                    </span>
+                </div>
+                <div class="photo-actions">
+                    <a href="{{ photo.image.url }}" target="_blank" class="btn-view" title="查看">
+                        <i class="fas fa-eye"></i>
+                    </a>
+                    <form method="post" action="{% url 'photo_delete' photo.id %}" class="delete-form" onsubmit="return confirm('确定要删除这张照片吗？');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-delete" title="删除">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-photos">
+            <i class="fas fa-images fa-3x"></i>
+            <h3>暂无照片</h3>
+            <p>上传你的第一张照片吧</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.photo-upload-page {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.upload-section, .photos-section {
+    background: var(--card-bg);
+    border-radius: var(--border-radius-lg);
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.upload-section h2, .photos-section h2 {
+    font-size: 1.5rem;
+    margin-bottom: 25px;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.upload-section h2 i, .photos-section h2 i {
+    color: var(--accent);
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.form-input, .form-textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #eee;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    transition: border-color 0.3s;
+    background: var(--background);
+    color: var(--text-primary);
+}
+
+.form-input:focus, .form-textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    color: var(--text-primary);
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent);
+}
+
+.file-upload-wrapper {
+    position: relative;
+}
+
+.file-input {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.file-upload-area {
+    border: 2px dashed var(--accent);
+    border-radius: var(--border-radius-lg);
+    padding: 40px;
+    text-align: center;
+    background: var(--background);
+    transition: background 0.3s;
+}
+
+.file-upload-area:hover {
+    background: rgba(53, 191, 171, 0.1);
+}
+
+.file-upload-area i {
+    color: var(--accent);
+    margin-bottom: 10px;
+}
+
+.file-upload-area p {
+    margin: 0;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.file-types {
+    display: block;
+    margin-top: 5px;
+    font-size: 0.85rem;
+    color: var(--primary);
+}
+
+.preview-area {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.preview-area img {
+    max-width: 300px;
+    max-height: 300px;
+    border-radius: var(--border-radius);
+    object-fit: contain;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 15px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--border-radius-xl);
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.submit-btn:hover {
+    background: #2da896;
+}
+
+.photo-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.photo-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 15px;
+    background: var(--background);
+    border-radius: var(--border-radius);
+    transition: transform 0.2s;
+}
+
+.photo-card:hover {
+    transform: translateX(5px);
+}
+
+.photo-thumb {
+    width: 80px;
+    height: 80px;
+    flex-shrink: 0;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+}
+
+.photo-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.photo-info {
+    flex: 1;
+}
+
+.photo-info h3 {
+    font-size: 1rem;
+    margin-bottom: 5px;
+    color: var(--text-primary);
+}
+
+.photo-date {
+    font-size: 0.85rem;
+    color: var(--primary);
+    margin-bottom: 5px;
+}
+
+.photo-status {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+}
+
+.status-public {
+    background: rgba(53, 191, 171, 0.2);
+    color: var(--accent);
+}
+
+.status-private {
+    background: rgba(123, 136, 142, 0.2);
+    color: var(--primary);
+}
+
+.photo-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-view, .btn-delete {
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s;
+}
+
+.btn-view {
+    background: var(--accent);
+    color: #fff;
+}
+
+.btn-view:hover {
+    background: #2da896;
+}
+
+.btn-delete {
+    background: #ff6b6b;
+    color: #fff;
+}
+
+.btn-delete:hover {
+    background: #ee5253;
+}
+
+.delete-form {
+    margin: 0;
+}
+
+.empty-photos {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--primary);
+}
+
+.empty-photos i {
+    color: var(--accent);
+    margin-bottom: 15px;
+}
+
+.empty-photos h3 {
+    margin-bottom: 10px;
+    color: var(--text-primary);
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .photo-card {
+        flex-wrap: wrap;
+    }
+    
+    .photo-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('id_image');
+    const previewArea = document.getElementById('preview-area');
+    const imagePreview = document.getElementById('image-preview');
+    const fileUploadArea = document.getElementById('file-upload-area');
+    
+    if (fileInput) {
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    previewArea.style.display = 'block';
+                    fileUploadArea.style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

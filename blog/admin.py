@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
 from markdownx.admin import MarkdownxModelAdmin
-from .models import Article, Category, SocialLink, SiteStat
+from .models import Article, Category, SocialLink, SiteStat, Photo
 
 
 class ArticleAdmin(MarkdownxModelAdmin):
@@ -60,11 +60,29 @@ class SiteStatAdmin(admin.ModelAdmin):
     search_fields = ('key', 'description')
 
 
+class PhotoAdmin(admin.ModelAdmin):
+    """照片管理界面"""
+    list_display = ('id', 'title', 'image_thumbnail', 'display_order', 'is_public', 'created_at')
+    list_display_links = ('id', 'title')
+    list_editable = ('display_order', 'is_public')
+    list_filter = ('is_public', 'created_at')
+    search_fields = ('title', 'description')
+    readonly_fields = ('created_at',)
+    ordering = ('-created_at',)
+
+    def image_thumbnail(self, obj):
+        if obj.image:
+            return format_html('<img src="{}" style="width: 100px; height: auto; border-radius: 4px;">', obj.image.url)
+        return '无图片'
+    image_thumbnail.short_description = '预览'
+
+
 # 注册模型到管理后台
 admin.site.register(Article, ArticleAdmin)
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(SocialLink, SocialLinkAdmin)
 admin.site.register(SiteStat, SiteStatAdmin)
+admin.site.register(Photo, PhotoAdmin)
 
 # 自定义管理后台标题
 admin.site.site_header = '博客管理后台'

@@ -130,17 +130,29 @@ STATICFILES_DIRS = [
     
 ]
 
-# Static files storage
-STATICFILES_STORAGE = 'blog.storage.FixedStaticFilesStorage'
-
 # Media files (上传的文件)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Storage backends
+STORAGES = {
+    "default": {
+        "BACKEND": "blog.storage.FixedMediaFilesStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "blog.storage.FixedStaticFilesStorage",
+    },
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# 登录配置
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = 'home'
 
 # Markdownx 配置
 MARKDOWNX_MARKDOWN_EXTENSIONS = [
@@ -152,11 +164,3 @@ MARKDOWNX_MARKDOWN_EXTENSIONS = [
 MARKDOWNX_UPLOAD_MAX_SIZE = 50 * 1024 * 1024  # 50MB
 MARKDOWNX_IMAGE_MAX_SIZE = {'size': (2000, 2000), 'quality': 90}
 MARKDOWNX_EDITOR_RESIZABLE = True
-
-# 修复静态文件存储URL生成问题
-import sys
-if 'django.contrib.staticfiles.storage' in sys.modules:
-    from django.contrib.staticfiles.storage import staticfiles_storage
-    from blog.storage import FixedStaticFilesStorage
-    if not isinstance(staticfiles_storage._wrapped, FixedStaticFilesStorage):
-        staticfiles_storage._wrapped = FixedStaticFilesStorage()
